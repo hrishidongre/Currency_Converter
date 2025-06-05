@@ -16,7 +16,7 @@ export default function Home() {
        try {
         const response = await fetch(apiUrl);
         const data = await response.json();
-        console.log("API Response:", data);
+        // console.log("API Response:", data);
 
         setExchangeRate(data.data[toCurrency].value)
        }catch (error){
@@ -45,12 +45,48 @@ export default function Home() {
       setCurrencies(currencyCodes)
     }
     fetchCountries()
+    
   },[])
 
-  useEffect(() => {
-  console.log(currencies, "✅ updated list of currencies");
+//   useEffect(() => {
+//   console.log(currencies, "✅ updated list of currencies");
 
-}, [currencies]);
+// }, [currencies]);
+
+const [amount,setAmount] = useState("")
+const [newPrice,setNewPrice] = useState("0.000")
+
+useEffect(() => {
+  if (amount && exchangeRate) {
+    const price = parseFloat(amount);
+    const rate = parseFloat(exchangeRate);
+
+    if (!isNaN(price) && !isNaN(rate)) {
+      setNewPrice((price * rate).toFixed(3));
+    }
+  }
+}, [amount, exchangeRate]);
+
+
+ useEffect(()=>{
+    const apiKey = process.env.NEXT_PUBLIC_CURRENCY_API_KEY
+    async function fetchCountries(){
+      const response = await fetch(`https://api.currencyapi.com/v3/currencies?apikey=${apiKey}&currencies=`)
+      const currencyData = await response.json();
+
+      const currencyCodes = Object.keys(currencyData.data)
+
+      setCurrencies(currencyCodes)
+    }
+    fetchCountries()
+    setNewPrice(parseFloat(newPrice))
+    
+  },[])
+
+  const newValue = parseFloat(newPrice).toFixed(3)
+
+
+
 
   
 
@@ -76,7 +112,9 @@ export default function Home() {
         <div>
           <select
           className="border border-black rounded m-5 p-2 w-[200px] h-[40px]"
-          onChange={(e) => {setCurrency(e.target.value)}}
+          ref = {fromCurrencyRef}
+
+          // onChange={(e) => {setCurrency(e.target.value)}}
           >
             <option value="INR">INR</option>
             {currencies.map((currency) => (
@@ -90,14 +128,17 @@ export default function Home() {
             type="text"
             className="border border-black rounded placeholder-gray-500  p-2 w-[596px] h-[40px]"
             placeholder="fromCountry"
-            ref = {fromCurrencyRef}
+            value = {amount}
+            onChange={(e)=>setAmount(e.target.value)}
           />
         </div>
 
         <div>
           <select
             className="border border-black rounded m-5 p-2 w-[200px] h-[40px]"
-            onChange={(e) => {setCurrency(e.target.value)}}
+            ref={toCurrencyRef}
+
+            // onChange={(e) => {setCurrency(e.target.value)}}
           >
             <option value="USD">USD</option>
             {currencies.map((currency) => (
@@ -108,14 +149,21 @@ export default function Home() {
             type="text"
             className="border border-black  placeholder-gray-500 p-2 rounded w-[596px] h-[40px]"
             placeholder="toCountry"
-            ref={toCurrencyRef}
+            value={newValue}
+            readOnly
           />
         </div>
 
       <input 
         type="submit"
         className="border border-black w-[200px] mb-5 mx-5"
-        onClick={()=>onSubmit()}
+        onClick={()=>
+        {
+          onSubmit();
+          // convertedPrice();
+        }
+        }
+
       />
    
 
