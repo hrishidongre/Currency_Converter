@@ -33,11 +33,9 @@ export default function Home() {
   },[toCurrencyRef,fromCurrencyRef])
 
 
-
   // Making dropdown menu
   const [currencies,setCurrencies] = useState([])
   
-
 
   useEffect(()=>{
     const apiKey = process.env.NEXT_PUBLIC_CURRENCY_API_KEY
